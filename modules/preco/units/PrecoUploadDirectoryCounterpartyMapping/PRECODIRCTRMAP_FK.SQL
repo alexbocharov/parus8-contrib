@@ -6,7 +6,7 @@ add
 constraint C_PRECODIRCTRMAP_BLREPCRN_FK foreign key (BLREPCRN)
   references ACATALOG(RN),
 -- Ссылка на контрагенты
-constraint C_PRECODIRCTRMAP_CATALOG_FK foreign key (AGENT)
+constraint C_PRECODIRCTRMAP_AGENT_FK foreign key (AGENT)
   references AGNLIST(RN),
 -- Ссылка на организации
 constraint C_PRECODIRCTRMAP_COMPANY_FK foreign key (COMPANY)
