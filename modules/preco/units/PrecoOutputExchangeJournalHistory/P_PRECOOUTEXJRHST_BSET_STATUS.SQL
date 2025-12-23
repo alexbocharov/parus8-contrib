@@ -10,19 +10,25 @@ create or replace procedure P_PRECOOUTEXJRHST_BSET_STATUS
   dUPDATED                  in date          -- Дата модификации
 )
 as
+  nPRN                      PKG_STD.tREF;
 begin
   /* изменение статуса в таблице */
   update PRECOOUTEXJRHST
-     set STATUS = sSTATUS,
+     set MSG_ID = sMSG_ID,
+         STATUS = sSTATUS,
          ERR_CODE = sERR_CODE,
          ERR_TEXT = sERR_TEXT,
          UPDATED = dUPDATED
    where RN = nRN
-     and COMPANY = nCOMPANY;
+     and COMPANY = nCOMPANY
+  returning PRN into nPRN;
 
   if (SQL%NOTFOUND) then
     PKG_MSG.RECORD_NOT_FOUND( nRN,'PrecoOutputExchangeJournalHistory' );
   end if;
+
+  /* изменение статуса в журнале */
+  P_PRECOOUTEXJR_BSET_STATUS( nPRN,nCOMPANY,sMSG_ID,sSTATUS,dUPDATED );
 end;
 /
 show errors procedure P_PRECOOUTEXJRHST_BSET_STATUS;
