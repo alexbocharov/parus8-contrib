@@ -1,4 +1,4 @@
-/* Базовое изменение статуса */
+/* Базовое изменение статуса журнала */
 create or replace procedure P_PRECOOUTEXJR_BSET_STATUS
 (
   nRN                       in number,       -- Регистрационный номер
