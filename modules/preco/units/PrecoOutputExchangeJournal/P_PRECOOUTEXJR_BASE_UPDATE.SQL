@@ -9,6 +9,7 @@ create or replace procedure P_PRECOOUTEXJR_BASE_UPDATE
   sREPORT_NAME              in varchar2,     -- Наименование отчета
   sMSG_ID                   in varchar2,     -- Идентификатор сообщения
   sSENDER_CODE              in varchar2,     -- Код системы-отправителя
+  bCONTENT                  in blob,         -- Содержимое
   sSTATUS                   in varchar2,     -- Статус
   dUPDATED                  in date          -- Дата модификации
 )
@@ -22,6 +23,7 @@ begin
          REPORT_NAME = sREPORT_NAME,
          MSG_ID = sMSG_ID,
          SENDER_CODE = sSENDER_CODE,
+         CONTENT = bCONTENT,
          STATUS = sSTATUS,
          UPDATED = dUPDATED
    where RN = nRN
