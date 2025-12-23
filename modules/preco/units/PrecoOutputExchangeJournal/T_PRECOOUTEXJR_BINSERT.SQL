@@ -8,7 +8,6 @@ begin
   dCURRENT_DATE := sysdate;
   :new.CREATED := coalesce( :new.CREATED,dCURRENT_DATE );
   :new.UPDATED := dCURRENT_DATE;
-  
   /* регистрация события */
   if ( PKG_IUD.PROLOGUE('PRECOOUTEXJR', 'I') ) then
     PKG_IUD.REG_RN('RN', :new.RN);
