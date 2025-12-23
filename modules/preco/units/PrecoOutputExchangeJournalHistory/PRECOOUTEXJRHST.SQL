@@ -9,7 +9,7 @@ COMPANY           number( 17 ) not null,
 CRN               number( 17 ) not null,
 /* Родитель */
 PRN               number( 17 ) not null,
-/* Юридическое лицо */
+/* Ссылка на юридическое лицо */
 JUR_PERS          number( 17 ) not null,
 /* Порядковый номер */
 NUMB              number( 17 ) not null

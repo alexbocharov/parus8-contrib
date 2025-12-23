@@ -5,7 +5,7 @@ create or replace view V_PRECOOUTEXJRHST
   nCOMPANY,                             -- Организация
   nCRN,                                 -- Каталог
   nPRN,                                 -- Родитель
-  nJUR_PERS,                            -- Юридическое лицо
+  nJUR_PERS,                            -- Ссылка на юридическое лицо
   nNUMB,                                -- Порядковый номер
   sMSG_ID,                              -- Идентификатор сообщения
   sAUTHID,                              -- Пользователь
