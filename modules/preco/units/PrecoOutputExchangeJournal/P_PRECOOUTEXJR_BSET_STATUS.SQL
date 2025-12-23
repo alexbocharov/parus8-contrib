@@ -4,7 +4,6 @@ create or replace procedure P_PRECOOUTEXJR_BSET_STATUS
   nRN                       in number,       -- Регистрационный номер
   nCOMPANY                  in number,       -- Организация
   sSTATUS                   in varchar2,     -- Статус
-  dCREATED                  in date,         -- Дата создания
   dUPDATED                  in date          -- Дата модификации
 )
 as
@@ -12,7 +11,6 @@ begin
   /* изменение статуса в таблице */
   update PRECOOUTEXJR
      set STATUS = sSTATUS,
-         CREATED = dCREATED,
          UPDATED = dUPDATED
    where RN = nRN
      and COMPANY = nCOMPANY;
