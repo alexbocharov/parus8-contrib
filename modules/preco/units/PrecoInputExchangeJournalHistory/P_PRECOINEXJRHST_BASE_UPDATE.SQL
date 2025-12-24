@@ -9,7 +9,7 @@ create or replace procedure P_PRECOINEXJRHST_BASE_UPDATE
   sSTATUS                   in varchar2,     -- Статус
   sERR_CODE                 in varchar2,     -- Код ошибки
   sERR_TEXT                 in varchar2,     -- Текст ошибки
-  dUPDATED                  in date          -- Дата модфикации
+  dUPDATED                  in date          -- Дата модификации
 )
 as
 begin
