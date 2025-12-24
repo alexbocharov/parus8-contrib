@@ -1,0 +1,1 @@
+grant execute on P_RPTPRTQUEUE_PRECO_SEND to PUBLIC;
