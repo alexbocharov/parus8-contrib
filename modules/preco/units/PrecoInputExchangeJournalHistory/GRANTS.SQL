@@ -1,0 +1,1 @@
+grant select on V_PRECOINEXJRHST to PUBLIC;
