@@ -11,7 +11,7 @@ create or replace view V_PRECOINEXJRHST
   sERR_CODE,                            -- Код ошибки
   sERR_TEXT,                            -- Текст ошибки
   dCREATED,                             -- Дата создания
-  dUPDATED                              -- Дата модфикации
+  dUPDATED                              -- Дата модификации
 )
 as
 select
