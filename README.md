@@ -19,6 +19,7 @@ These additions complement the core platform without modifying its foundational 
 - **/integrations/**   — adapters, connectors, integration examples  
 - **/tools/**          — helper utilities and scripts  
 - **/examples/**       — usage examples and reference implementations  
+- **/options/**        — system configuration options and presets
 - **/docs/**           — documentation for contributed components  
 
 ## 🧱 **Contribution Guidelines**
