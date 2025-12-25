@@ -88,18 +88,24 @@ begin
     cCONTENT := blob2clob( bCONTENT );
 
     /* Получение кода формы отчёта */
-    sREPORT_CODE := GET_CLOB_EXTRACT_BETWEEN( cCONTENT,'КОДФ=','ПРД=' );
+    sREPORT_CODE := GET_CLOB_EXTRACT_BETWEEN( 0,cCONTENT,'КОДФ=','ПРД=' );
     if sREPORT_CODE is null then
       P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Код формы отчёта не определён.', nMSG);
       continue;
     end if;
 
     /* Дата отчёта */
-    dREPORT_DATE := TO_DATE(GET_CLOB_EXTRACT_BETWEEN( cCONTENT,'РДТ=','ВИД=' ), 'DD.MM.YYYY');
-    if dREPORT_DATE is null then
-      P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Дата отчёта не определена.', nMSG);
-      continue;
-    end if;
+    begin
+      dREPORT_DATE := TO_DATE(GET_CLOB_EXTRACT_BETWEEN( 0,cCONTENT,'РДТ=','ВИД=' ), 'DD.MM.YYYY');
+      if dREPORT_DATE is null then
+        P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Дата отчёта не определена.', nMSG);
+        continue;
+      end if;
+    exception
+      when OTHERS then
+        P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Ошибка определения даты отчёта.', nMSG);
+        continue;
+    end;
 
     /* Идентификатор сообщения */
     sMSG_ID := lower(PKG_GUID.SEPARATED());

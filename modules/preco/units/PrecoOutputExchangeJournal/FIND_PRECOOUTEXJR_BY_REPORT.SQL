@@ -17,7 +17,8 @@ begin
       from PRECOOUTEXJR
      where JUR_PERS = nJUR_PERS
        and REPORT_CODE = sREPORT_CODE
-       and REPORT_DATE = dREPORT_DATE;
+       and REPORT_DATE = dREPORT_DATE
+       and COMPANY = nCOMPANY;
   exception
     when NO_DATA_FOUND then
       P_EXCEPTION( nFLAG_SMART, 'Запись в журнале исходящего обмена отчётностью ПРЕКО не найдена для юридического лица ' || nJUR_PERS || ', формы ' || sREPORT_CODE || ', даты отчёта ' || to_char(dREPORT_DATE, 'DD.MM.YYYY') || '.' );
