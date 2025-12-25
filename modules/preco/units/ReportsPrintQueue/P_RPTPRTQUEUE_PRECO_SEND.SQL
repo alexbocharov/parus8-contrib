@@ -7,8 +7,8 @@ create or replace procedure P_RPTPRTQUEUE_PRECO_SEND
 )
 as
   nMSG                      PKG_STD.tREF;
-  bDATA                     blob;
-  cDATA                     clob;
+  bCONTENT                  blob;
+  cCONTENT                  clob;
   sJUR_PERS_CODE            PKG_STD.tSTRING;
   nJUR_PERS                 PKG_STD.tREF;
   sAGENT_NAME               PKG_STD.tSTRING;
@@ -21,6 +21,7 @@ as
   nPRECOOUTEXJR             PKG_STD.tREF;
   nPRECOOUTEXJRHST          PKG_STD.tREF;
   nNUMB                     PRECOOUTEXJRHST.NUMB%type;
+  dCURRENT_DATE             date;
 begin
   /* Инициализация */
   nOPEN := 0;
@@ -42,7 +43,7 @@ begin
     /* Данные выгрузки отчёта */
     begin
       select T.REPORT
-        into bDATA
+        into bCONTENT
         from RPTPRTQUEUE_RPT T
        where T.PRN = rREC.REPORT_QUEUE_RN
          and T.REC_TYPE = 1; 
@@ -84,17 +85,17 @@ begin
     end if;
 
     /* Преобразование BLOB в CLOB */
-    cDATA := blob2clob( bDATA );
+    cCONTENT := blob2clob( bCONTENT );
 
     /* Получение кода формы отчёта */
-    sREPORT_CODE := GET_CLOB_EXTRACT_BETWEEN( cDATA,'КОДФ=','ПРД=' );
+    sREPORT_CODE := GET_CLOB_EXTRACT_BETWEEN( cCONTENT,'КОДФ=','ПРД=' );
     if sREPORT_CODE is null then
       P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Код формы отчёта не определён.', nMSG);
       continue;
     end if;
 
     /* Дата отчёта */
-    dREPORT_DATE := TO_DATE(GET_CLOB_EXTRACT_BETWEEN( cDATA,'РДТ=','ВИД=' ), 'DD.MM.YYYY');
+    dREPORT_DATE := TO_DATE(GET_CLOB_EXTRACT_BETWEEN( cCONTENT,'РДТ=','ВИД=' ), 'DD.MM.YYYY');
     if dREPORT_DATE is null then
       P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Дата отчёта не определена.', nMSG);
       continue;
@@ -122,7 +123,7 @@ begin
         rREC.REPORT_NAME,
         sMSG_ID,
         'PARUS8',
-        bDATA,
+        bCONTENT,
         PKG_PRECOOUTEXJR.sSTATUS_NEW,
         nPRECOOUTEXJR
       );
@@ -149,9 +150,42 @@ begin
         nPRECOOUTEXJRHST
       );
 
-      P_MSGJOURNAL_BASE_INSERT(nIDENT, 1, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Отчёт успешно отправлен. Идентификатор сообщения: ' || sMSG_ID, nMSG);
+      P_MSGJOURNAL_BASE_INSERT(nIDENT, 0, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Отчёт успешно отправлен. Идентификатор сообщения: ' || sMSG_ID, nMSG);
     else
-      null;
+      /* Текущая дата */
+      dCURRENT_DATE := sysdate;
+
+      /* Запись уже существует */
+      update PRECOOUTEXJR
+         set CONTENT       = bCONTENT,
+             MSG_ID        = sMSG_ID,
+             STATUS        = PKG_PRECOOUTEXJR.sSTATUS_UPDATED,
+             UPDATED       = dCURRENT_DATE
+       where RN = nPRECOOUTEXJR;
+
+      /* Генерация порядкового номера для журнала истории изменений */
+      P_PRECOOUTEXJRHST_GETNEXTNUMB
+      (
+        nCOMPANY,
+        nPRECOOUTEXJR,
+        nNUMB
+      );
+
+      /* Запись в журнал истории изменений журнала исходящего обмена отчётностью ПРЕКО */
+      P_PRECOOUTEXJRHST_BASE_INSERT
+      (
+        nCOMPANY,
+        nPRECOOUTEXJR,
+        nNUMB,
+        sMSG_ID,
+        UTILIZER,
+        PKG_PRECOOUTEXJR.sSTATUS_UPDATED,
+        null,
+        null,
+        nPRECOOUTEXJRHST
+      );
+
+      P_MSGJOURNAL_BASE_INSERT(nIDENT, 0, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Отчёт успешно обновлён. Идентификатор сообщения: ' || sMSG_ID, nMSG);
     end if;
   end loop;
 
