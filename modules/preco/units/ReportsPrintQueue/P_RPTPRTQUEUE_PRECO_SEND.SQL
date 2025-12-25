@@ -6,6 +6,7 @@ create or replace procedure P_RPTPRTQUEUE_PRECO_SEND
   nOPEN                     out number       -- Признак открытия журнала сообщений
 )
 as
+  sSENDER_CODE_OPTIONS      PKG_STD.tSTRING;
   nMSG                      PKG_STD.tREF;
   bCONTENT                  blob;
   cCONTENT                  clob;
@@ -25,6 +26,9 @@ as
 begin
   /* Инициализация */
   nOPEN := 0;
+
+  /* Получение кода системы-отправителя из параметра системы */
+  sSENDER_CODE_OPTIONS := PKG_OPTIONS.GET_OPTIONS_STR( 'PrecoOutputExchangeJournal_SenderCode',nCOMPANY );
 
   for rREC in
   (
@@ -128,7 +132,7 @@ begin
         dREPORT_DATE,
         rREC.REPORT_NAME,
         sMSG_ID,
-        'PARUS8',
+        sSENDER_CODE_OPTIONS,
         bCONTENT,
         PKG_PRECOOUTEXJR.sSTATUS_NEW,
         nPRECOOUTEXJR
@@ -163,7 +167,8 @@ begin
 
       /* Запись уже существует */
       update PRECOOUTEXJR
-         set CONTENT       = bCONTENT,
+         set SENDER_CODE   = sSENDER_CODE_OPTIONS,
+             CONTENT       = bCONTENT,
              MSG_ID        = sMSG_ID,
              STATUS        = PKG_PRECOOUTEXJR.sSTATUS_UPDATED,
              UPDATED       = dCURRENT_DATE
