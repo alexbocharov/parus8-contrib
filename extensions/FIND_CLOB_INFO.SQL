@@ -1,4 +1,3 @@
-/* Отправить в "ПРЕКО. Платформа сбора первичной отчётности. Журнал исходящего обмена отчётностью" */
 create or replace procedure FIND_CLOB_INFO
 (
   cCLOB                     in clob,         -- CLOB для поиска

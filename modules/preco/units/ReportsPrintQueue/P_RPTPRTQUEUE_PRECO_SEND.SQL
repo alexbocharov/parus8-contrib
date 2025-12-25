@@ -8,11 +8,19 @@ create or replace procedure P_RPTPRTQUEUE_PRECO_SEND
 as
   nMSG                      PKG_STD.tREF;
   bDATA                     blob;
+  cDATA                     clob;
   sJUR_PERS_CODE            PKG_STD.tSTRING;
   nJUR_PERS                 PKG_STD.tREF;
   sAGENT_NAME               PKG_STD.tSTRING;
   sAGENT_INN                PKG_STD.tSTRING;
   sAGENT_KPP                PKG_STD.tSTRING;
+  sREPORT_CODE              PKG_STD.tSTRING;
+  dREPORT_DATE              date;
+  sMSG_ID                   PKG_STD.tSTRING;
+  nCRN                      PKG_STD.tREF;
+  nPRECOOUTEXJR             PKG_STD.tREF;
+  nPRECOOUTEXJRHST          PKG_STD.tREF;
+  nNUMB                     PRECOOUTEXJRHST.NUMB%type;
 begin
   /* Инициализация */
   nOPEN := 0;
@@ -75,6 +83,74 @@ begin
       continue;
     end if;
 
+    /* Преобразование BLOB в CLOB */
+    cDATA := blob2clob( bDATA );
+
+    /* Получение кода формы отчёта */
+    FIND_CLOB_INFO( cDATA,'КОДФ=','ПРД=',sREPORT_CODE );
+    if sREPORT_CODE is null then
+      P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Код формы отчёта не определён.', nMSG);
+      continue;
+    end if;
+
+    /* Дата отчёта */
+    FIND_CLOB_INFO( cDATA,'РДТ=','ВИД=',dREPORT_DATE );
+    if dREPORT_DATE is null then
+      P_MSGJOURNAL_BASE_INSERT(nIDENT, 2, 'Отправка отчёта "' || rREC.REPORT_NAME || '" в ПРЕКО. Платформа сбора первичной отчётности: Дата отчёта не определена.', nMSG);
+      continue;
+    end if;
+
+    /* Идентификатор сообщения */
+    sMSG_ID := lower(PKG_GUID.SEPARATED());
+
+    /* Запись в журнал исходящего обмена отчётностью ПРЕКО */
+    FIND_PRECOOUTEXJR_BY_REPORT( 1,nCOMPANY,nJUR_PERS,dREPORT_DATE,sREPORT_CODE,nPRECOOUTEXJR );
+
+    /* Отправка отчёта в ПРЕКО */
+    if (nPRECOOUTEXJR is null) then
+      /* Поиск каталога */
+      FIND_ROOT_CATALOG( nCOMPANY,'PrecoOutputExchangeJournal',nCRN );
+
+      /* Добавление записи в журнал исходящего обмена отчётностью ПРЕКО */
+      P_PRECOOUTEXJR_BASE_INSERT
+      (
+        nCOMPANY,
+        nCRN,
+        nJUR_PERS,
+        sREPORT_CODE,
+        dREPORT_DATE,
+        rREC.REPORT_NAME,
+        sMSG_ID,
+        'PARUS8',
+        bDATA,
+        PKG_PRECOOUTEXJR.sSTATUS_NEW,
+        nPRECOOUTEXJR
+      );
+
+      /* Генерация порядкового номера для журнала истории изменений */
+      P_PRECOOUTEXJRHST_GETNEXTNUMB
+      (
+        nCOMPANY,
+        nPRECOOUTEXJR,
+        nNUMB
+      );
+
+      /* Запись в журнал истории изменений журнала исходящего обмена отчётностью ПРЕКО */
+      P_PRECOOUTEXJRHST_BASE_INSERT
+      (
+        nCOMPANY,
+        nPRECOOUTEXJR,
+        nNUMB,
+        sMSG_ID,
+        'PARUS8',
+        PKG_PRECOOUTEXJR.sSTATUS_NEW,
+        null,
+        null,
+        nPRECOOUTEXJRHST
+      );
+    else
+      null;
+    end if;
   end loop;
 
   /* Открыть журнал сообщений, если есть сообщения */
