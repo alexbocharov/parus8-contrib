@@ -15,7 +15,7 @@ begin
 
   nPOS_START := instr(cCLOB, sSTART);
   if (nPOS_START = 0) then
-    P_EXCEPTION( nFLAG_SMART, 'Начальная токен "%s" не найден в CLOB.',sSTART );
+    P_EXCEPTION( nFLAG_SMART, 'Начальный токен "%s" не найден в CLOB.',sSTART );
   end if;
 
   nPOS_END := instr(cCLOB, sEND, nPOS_START + length(sSTART));
